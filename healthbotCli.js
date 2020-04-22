@@ -37,7 +37,8 @@ if (action === "post_scenario") {
 
       rp(options)
         .then(function (parsedBody) {
-          console.log(parsedBody);
+          // Remain silent to follow *nix standards
+          //console.log(parsedBody);
         })
         .catch(function (err) {
           console.log(err.message);
@@ -59,7 +60,7 @@ if (action === "get_scenarios") {
     .then(function (parsedBody) {
       const scenarios = JSON.parse(parsedBody);
       scenarios.map(i => {
-        console.log(`${i.name} - ${i.id} - ${i.description ? i.description : "No description"}`)
+        console.log(`${i.name} ${i.description ? "- " + i.description : ""}`)
       });
     })
     .catch(function (err) {
