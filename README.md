@@ -9,4 +9,4 @@ node healthbotCli.js post_scenario <tenantName> <API_JWT_secret> <inputFilePath>
 ```
 
 # Authentication
-Both <tenantName> and __<API_JWT_secret>__ values comes from the _Integration_ > _Secrets_ page within the Healthbot Service management portal. 
+Both __<tenantName>__ and __<API_JWT_secret>__ values comes from the _Integration_ > _Secrets_ page within the Healthbot Service management portal. 
