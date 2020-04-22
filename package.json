@@ -1,0 +1,24 @@
+{
+  "name": "azure-healthbot-ci",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patniko/azure-healthbot-ci.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patniko/azure-healthbot-ci/issues"
+  },
+  "homepage": "https://github.com/patniko/azure-healthbot-ci#readme",
+  "dependencies": {
+    "request": "^2.82.0",
+    "request-promise": "^4.2.2",
+    "jsonwebtoken": "^8.0.1"
+  }
+}
