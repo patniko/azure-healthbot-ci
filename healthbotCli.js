@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const rp = require("request-promise");
 const fs = require('fs');
 
-if (process.argv.length < 5 && process.argv.length > 7) {
+if (process.argv.length < 5) {
     console.log("Usage: node healthbotCli.js get_scenarios <tenantName> <API_JWT_secret>");
     console.log("Usage: node healthbotCli.js get_scenario <tenantName> <API_JWT_secret> <scenarioName> <outputFilePath>");
     console.log("Usage: node healthbotCli.js post_scenario <tenantName> <API_JWT_secret> <inputFilePath>");
