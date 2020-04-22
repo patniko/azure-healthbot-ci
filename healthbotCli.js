@@ -6,8 +6,15 @@ if (process.argv.length < 5) {
   console.log("Usage: node healthbotCli.js get_scenarios <tenantName> <API_JWT_secret>");
   console.log("Usage: node healthbotCli.js get_scenario <tenantName> <API_JWT_secret> <scenarioName> <outputFilePath>");
   console.log("Usage: node healthbotCli.js post_scenario <tenantName> <API_JWT_secret> <inputFilePath>");
+  console.log("Usage: node healthbotCli.js get_medical <tenantName> <API_JWT_secret>");
+  console.log("Usage: node healthbotCli.js post_medical <tenantName> <API_JWT_secret> <inputFilePath>");
+  console.log("Usage: node healthbotCli.js get_privacy <tenantName> <API_JWT_secret>");
+  console.log("Usage: node healthbotCli.js post_privacy <tenantName> <API_JWT_secret> <inputFilePath>");
+  console.log("Usage: node healthbotCli.js get_interactions <tenantName> <API_JWT_secret>");
+  console.log("Usage: node healthbotCli.js post_interactions <tenantName> <API_JWT_secret> <inputFilePath>");
   process.exit();
 }
+
 const action = process.argv[2];
 const tenantName = process.argv[3];
 const jwtSecret = process.argv[4];
@@ -97,3 +104,68 @@ if (action === "get_scenario") {
     });
 }
 
+function getConfiguration(name) {
+  if (action === "get_scenario") {
+    const options = {
+      method: 'GET',
+      uri: `${BASE_URL}api/account/${tenantName}/configuration/${name}/read`,
+      headers: {
+        'Authorization': 'Bearer ' + jwtToken
+      }
+    };
+
+    rp(options)
+      .then(function (parsedBody) {
+        fs.writeFile(targetFile, parsedBody, (err) => {
+          if (err) {
+            console.error(err);
+            return;
+          };
+        });
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  }
+}
+
+function postConfiguration(name, targetFile) {
+  fs.readFile(targetFile, 'utf8', (err, configJson) => {
+    if (err) {
+      console.log("File read failed:", err)
+      return
+    } else {
+      const options = {
+        method: 'POST',
+        uri: `${BASE_URL}api/account/${tenantName}/configuration/${name}/save`,
+        headers: {
+          'Authorization': 'Bearer ' + jwtToken
+        },
+        body: configJson,
+        json: true
+      };
+
+      rp(options)
+        .then(function (parsedBody) {
+          // Remain silent to follow *nix standards
+          //console.log(parsedBody);
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+    }
+  });
+}
+
+if (action === "get_medical")
+  getConfiguration("medical/triage");
+elseif(action === "post_medical")
+  postConfiguration("conversation/interactions", targetFile);
+elseif(action === "get_privacy")
+  getConfiguration("compliance/privacy");
+elseif(action === "post_privacy")
+  postConfiguration("compliance/privacy", targetFile);
+elseif(action === "get_interactions")
+  getConfiguration("conversation/interactions");
+elseif(action === "post_interactions")
+  postConfiguration("conversation/interactions", targetFile);

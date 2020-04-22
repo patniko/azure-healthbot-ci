@@ -6,6 +6,12 @@ Node CLI utility to snapshot Healthbot scenarios and import them into new enviro
 node healthbotCli.js get_scenarios <tenantName> <API_JWT_secret>
 node healthbotCli.js get_scenario <tenantName> <API_JWT_secret> <scenarioName> <outputFilePath>
 node healthbotCli.js post_scenario <tenantName> <API_JWT_secret> <inputFilePath>
+node healthbotCli.js get_medical <tenantName> <API_JWT_secret>
+node healthbotCli.js post_medical <tenantName> <API_JWT_secret> <inputFilePath>
+node healthbotCli.js get_privacy <tenantName> <API_JWT_secret>
+node healthbotCli.js post_privacy <tenantName> <API_JWT_secret> <inputFilePath>
+node healthbotCli.js get_interactions <tenantName> <API_JWT_secret>
+node healthbotCli.js post_interactions <tenantName> <API_JWT_secret> <inputFilePath>
 ```
 
 # Authentication
