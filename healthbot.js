@@ -52,7 +52,7 @@ function postConfiguration(name, targetFile) {
   });
 }
 
-export default function processCli() {
+function processArgs() {
   const jwt = require("jsonwebtoken");
   const rp = require("request-promise");
   const fs = require('fs');
@@ -149,14 +149,16 @@ export default function processCli() {
 
   if (action === "get_medical")
     getConfiguration("medical/triage");
-  elseif(action === "post_medical")
+  else if(action === "post_medical")
     postConfiguration("conversation/interactions", targetFile);
-  elseif(action === "get_privacy")
+  else if(action === "get_privacy")
     getConfiguration("compliance/privacy");
-  elseif(action === "post_privacy")
+  else if(action === "post_privacy")
     postConfiguration("compliance/privacy", targetFile);
-  elseif(action === "get_interactions")
+  else if(action === "get_interactions")
     getConfiguration("conversation/interactions");
-  elseif(action === "post_interactions")
+  else if(action === "post_interactions")
     postConfiguration("conversation/interactions", targetFile);
 }
+
+module.exports.processArgs = processArgs;

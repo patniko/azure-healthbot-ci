@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import processCli from "./healthbot";
+const cli = require("./healthbot.js");
 
 if (process.argv.length < 5) {
   console.log("Usage: node healthbotCli.js get_scenarios <tenantName> <API_JWT_secret>");
@@ -14,4 +14,4 @@ if (process.argv.length < 5) {
   process.exit();
 }
 
-processCli();
+cli.processArgs();
