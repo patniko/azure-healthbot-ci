@@ -31,23 +31,16 @@ stages:
       displayName: 'azure-healthbot-ci install'
 
     - script: |
-        azure-healthbot-ci get_medical $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/medical.json
-        azure-healthbot-ci get_privacy $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/privacy.json
-        azure-healthbot-ci get_interactions $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/interactions.json
-        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/scenario.json
+        mkdir $(Agent.BuildDirectory)/snapshots
+        azure-healthbot-ci get_medical $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/snapshots/medical.json
+        azure-healthbot-ci get_privacy $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/snapshots/privacy.json
+        azure-healthbot-ci get_interactions $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/snapshots/interactions.json
+        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/snapshots/scenario.json
       displayName: 'Snapshot configurations'
-      
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: '$(Agent.BuildDirectory)/'
-        Contents: '**'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-        CleanTargetFolder: true
-        OverWrite: true
 
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        rootFolderOrFile: '$(Agent.BuildDirectory)/snapshots/'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
@@ -56,7 +49,6 @@ stages:
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
       artifact: drop
-    
 
 - stage: Deploy
   displayName: Deploy stage
