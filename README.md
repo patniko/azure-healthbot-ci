@@ -1,17 +1,28 @@
 # azure-healthbot-ci
-Node CLI utility to snapshot Healthbot scenarios and import them into new environments.
+Node CLI utility to snapshot Azure Healthbot configurations and import them into new environments. Can be used to move things from a temporary staging environment into production without disrupting user interactions with bots.
+
+# Getting started
+
+```
+npm install azure-healthbot-ci -g
+```
 
 # Usage 
+
+## Fetching Configurations
 ```
-node healthbotCli.js get_scenarios <tenantName> <API_JWT_secret>
-node healthbotCli.js get_scenario <tenantName> <API_JWT_secret> <scenarioName> <outputFilePath>
-node healthbotCli.js post_scenario <tenantName> <API_JWT_secret> <inputFilePath>
-node healthbotCli.js get_medical <tenantName> <API_JWT_secret>
-node healthbotCli.js post_medical <tenantName> <API_JWT_secret> <inputFilePath>
-node healthbotCli.js get_privacy <tenantName> <API_JWT_secret>
-node healthbotCli.js post_privacy <tenantName> <API_JWT_secret> <inputFilePath>
-node healthbotCli.js get_interactions <tenantName> <API_JWT_secret>
-node healthbotCli.js post_interactions <tenantName> <API_JWT_secret> <inputFilePath>
+azure-healthbot-ci get_scenarios <tenantName> <API_JWT_secret>
+azure-healthbot-ci get_scenario <tenantName> <API_JWT_secret> <scenarioName> <outputFilePath>
+azure-healthbot-ci get_medical <tenantName> <API_JWT_secret> <outputFilePath>
+azure-healthbot-ci get_privacy <tenantName> <API_JWT_secret> <outputFilePath>
+azure-healthbot-ci get_interactions <tenantName> <API_JWT_secret> <outputFilePath>
+```
+## Updating Configurations
+```
+azure-healthbot-ci post_scenario <tenantName> <API_JWT_secret> <inputFilePath>
+azure-healthbot-ci post_medical <tenantName> <API_JWT_secret> <inputFilePath>
+azure-healthbot-ci post_privacy <tenantName> <API_JWT_secret> <inputFilePath>
+azure-healthbot-ci post_interactions <tenantName> <API_JWT_secret> <inputFilePath>
 ```
 
 # Authentication
