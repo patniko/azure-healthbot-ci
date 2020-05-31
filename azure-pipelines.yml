@@ -1,8 +1,11 @@
+# Transfer one scenario and bot configurations to a new instance.
+
 # Variables:
-#  Azure Storage Account Information
+#  $(scenarioName)
 #  $(tenantName1) 
 #  $(jwtSecret1)
-#  $(scenarioName)
+#  $(tenantName2) 
+#  $(jwtSecret2)
 
 trigger:
   none
@@ -28,10 +31,10 @@ stages:
       displayName: 'azure-healthbot-ci install'
 
     - script: |
-        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/scenario.json
         azure-healthbot-ci get_medical $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/medical.json
         azure-healthbot-ci get_privacy $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/privacy.json
         azure-healthbot-ci get_interactions $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/interactions.json
+        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/scenario.json
       displayName: 'Snapshot configurations'
       
     - task: CopyFiles@2
@@ -76,9 +79,9 @@ stages:
               archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
               destinationFolder: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)/dist'
               cleanDestinationFolder: true
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: '$(account-subscription)'
-              scriptType: 'pscore'
-              scriptLocation: 'inlineScript'
-              inlineScript: 'az storage blob upload-batch --account-name "$(account-name)" --account-key "$(account-key)" --destination ''$web'' --source $(System.DefaultWorkingDirectory)/$(Build.BuildId)/dist'
+          - script: |
+              azure-healthbot-ci get_medical $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/medical.json
+              azure-healthbot-ci get_privacy $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/privacy.json
+              azure-healthbot-ci get_interactions $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/interactions.json
+              azure-healthbot-ci get_scenario $(tenantName2) $(jwtSecret2) $(scenarioName) $(Agent.BuildDirectory)/dist/scenario.json
+            displayName: 'Update configurations'
