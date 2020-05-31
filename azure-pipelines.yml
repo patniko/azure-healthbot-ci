@@ -1,0 +1,87 @@
+# Transfer one scenario and bot configurations to a new instance.
+
+# Variables:
+#  $(scenarioName)
+#  $(tenantName1) 
+#  $(jwtSecret1)
+#  $(tenantName2) 
+#  $(jwtSecret2)
+
+trigger:
+  none
+
+stages:
+- stage: Snapshot
+  displayName: Snapshot Configuration
+
+  jobs:
+  - job: Snapshot
+    displayName: Snapshot
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install azure-healthbot-ci -g
+      displayName: 'azure-healthbot-ci install'
+
+    - script: |
+        azure-healthbot-ci get_medical $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/medical.json
+        azure-healthbot-ci get_privacy $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/privacy.json
+        azure-healthbot-ci get_interactions $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/interactions.json
+        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/scenario.json
+      displayName: 'Snapshot configurations'
+      
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Agent.BuildDirectory)/'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: true
+        OverWrite: true
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+        verbose: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop
+    
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Snapshot
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'development'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              destinationFolder: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)/dist'
+              cleanDestinationFolder: true
+          - script: |
+              azure-healthbot-ci get_medical $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/medical.json
+              azure-healthbot-ci get_privacy $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/privacy.json
+              azure-healthbot-ci get_interactions $(tenantName2) $(jwtSecret2) $(Agent.BuildDirectory)/dist/interactions.json
+              azure-healthbot-ci get_scenario $(tenantName2) $(jwtSecret2) $(scenarioName) $(Agent.BuildDirectory)/dist/scenario.json
+            displayName: 'Update configurations'
