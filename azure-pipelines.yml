@@ -1,0 +1,84 @@
+# Variables:
+#  Azure Storage Account Information
+#  $(tenantName1) 
+#  $(jwtSecret1)
+#  $(scenarioName)
+
+trigger:
+  none
+
+stages:
+- stage: Snapshot
+  displayName: Snapshot Configuration
+
+  jobs:
+  - job: Snapshot
+    displayName: Snapshot
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install azure-healthbot-ci -g
+      displayName: 'azure-healthbot-ci install'
+
+    - script: |
+        azure-healthbot-ci get_scenario $(tenantName1) $(jwtSecret1) $(scenarioName) $(Agent.BuildDirectory)/scenario.json
+        azure-healthbot-ci get_medical $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/medical.json
+        azure-healthbot-ci get_privacy $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/privacy.json
+        azure-healthbot-ci get_interactions $(tenantName1) $(jwtSecret1) $(Agent.BuildDirectory)/interactions.json
+      displayName: 'Snapshot configurations'
+      
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Agent.BuildDirectory)/'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: true
+        OverWrite: true
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+        verbose: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop
+    
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'development'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              destinationFolder: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)/dist'
+              cleanDestinationFolder: true
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: '$(account-subscription)'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: 'az storage blob upload-batch --account-name "$(account-name)" --account-key "$(account-key)" --destination ''$web'' --source $(System.DefaultWorkingDirectory)/$(Build.BuildId)/dist'
